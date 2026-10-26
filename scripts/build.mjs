@@ -1,7 +1,7 @@
 import { cp, mkdir, rm, writeFile, access } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 process.chdir(fileURLToPath(new URL('..', import.meta.url)));
-for (const file of ['vendor/vision_bundle.js', 'vendor/hand_landmarker.task', 'vendor/wasm/vision_wasm_internal.wasm']) await access(file);
+for (const file of ['vendor/connect.mjs', 'vendor/vision_bundle.js', 'vendor/hand_landmarker.task', 'vendor/wasm/vision_wasm_internal.wasm']) await access(file);
 await rm('dist', { recursive: true, force: true });
 await mkdir('dist/tests', { recursive: true });
 for (const path of ['index.html', 'phone.html', 'src', 'vendor']) await cp(path, `dist/${path}`, { recursive: true });
