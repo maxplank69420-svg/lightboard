@@ -78,3 +78,17 @@ Drawings and calibration are saved per browser origin: the hosted app and localh
 - `.github/workflows/pages.yml`: verification and Pages deployment.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidance and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for upstream runtime/model information.
+
+## Small hands / distant webcam
+
+In **Setup**, use **High** (request 1080p) or **Maximum** (request 4K), then reconnect. The actual camera resolution is displayed below the preview; requesting 4K cannot make a lower-resolution webcam supply 4K detail. Increase **Tracking crop** and click the preview to center its green box on your drawing area. The detector receives that crop, and detections are mapped back into the full camera image so crop adjustments preserve calibration. Keep every calibration target and the entire drawing area inside the crop.
+
+If bare-hand recognition still fails, select **Colored fingertip marker · long range**. Put bright pink tape or a colored cap on your fingertip, choose its color in Setup, reconnect, and recalibrate using the marker at each target. This tracks a colored patch instead of recognizing finger joints. Choose a color different from projected ink and objects in view. Similar-sized matching patches cause tracking to pause rather than guess.
+
+Marker ink starts paused. Press **Space**, click **Ink paused**, or dwell over that projected button to start/stop drawing. Cover the marker to reposition without drawing. This mode cannot distinguish wall contact or recognize hand gestures. No camera frames leave the browser.
+
+Cropping makes a small hand or marker larger in the detector's input; it cannot recover missing sensor detail or motion blur. Actual usable distance depends on your installation and needs physical testing.
+
+## Erase
+
+Click **Erase** in the bottom toolbar or press **E**. It starts with a broad brush (48), has its own saved-in-session size, and the size slider adjusts it up to 120. With the webcam, use your normal drawing gesture (or marker ink) to erase; the cursor becomes a dashed eraser circle. Hold over the projected Erase button to select it from the wall. Press **P** or select a color to return to drawing. Undo restores erased ink. The clear button removes the whole canvas after confirmation and is also undoable.
