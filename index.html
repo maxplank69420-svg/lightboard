@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#000000"><title>Lightboard — Your wall, your ideas.</title><link rel="stylesheet" href="src/style.css"></head>
+<body>
+<canvas id="board" aria-label="Drawing canvas. Draw with a mouse, touchscreen, or calibrated webcam."></canvas>
+<header id="topbar" class="chrome">
+  <a class="brand" href="./" aria-label="Lightboard home"><span class="brand-mark">l<span>↗</span></span> lightboard<span class="badge">LOCAL STUDIO</span></a>
+  <div class="top-actions"><span id="camera-status" class="status"><i></i> Camera off</span><button id="settings-button" class="quiet">Setup <span>↗</span></button><button id="fullscreen" class="quiet" title="Fullscreen (F)">⛶ <span>Fullscreen</span></button></div>
+</header>
+<main id="welcome" class="chrome welcome">
+  <div class="eyebrow"><span></span> A LITTLE LIGHT. ENDLESS POSSIBILITIES.</div>
+  <h1>Your wall.<br>Your <em>ideas.</em></h1>
+  <p>Turn any projection into a canvas.<br>One finger is all you need.</p>
+  <div class="welcome-actions"><button id="get-started" class="primary">Set up your camera <span>↗</span></button><button id="try-mouse" class="text-button">Or just start drawing →</button></div>
+  <div class="steps"><span><b>01</b> Connect</span><span class="step-line"></span><span><b>02</b> Calibrate</span><span class="step-line"></span><span><b>03</b> Create</span></div>
+</main>
+<div id="cursor" hidden></div>
+<div id="drawing-indicator" hidden><span></span> INK ON</div>
+<footer class="chrome" id="bottom-ui">
+  <div class="board-label"><span class="tiny-cross">＋</span><div>Untitled canvas<small id="save-status">Saved on this device</small></div></div>
+  <nav id="toolbar" aria-label="Drawing tools">
+    <button id="pen" class="tool selected" title="Pen (P)" aria-label="Pen" aria-pressed="true">✎</button><button id="eraser" class="tool" title="Eraser (E)" aria-label="Eraser" aria-pressed="false">▱</button><span class="divider"></span>
+    <div id="palette" aria-label="Ink color"><button class="swatch selected" data-color="#ffffff" style="--swatch:#ffffff" aria-label="White ink" aria-pressed="true"></button><button class="swatch" data-color="#baf4cf" style="--swatch:#baf4cf" aria-label="Mint ink" aria-pressed="false"></button><button class="swatch" data-color="#a7c9ff" style="--swatch:#a7c9ff" aria-label="Blue ink" aria-pressed="false"></button><button class="swatch" data-color="#ffb6cb" style="--swatch:#ffb6cb" aria-label="Pink ink" aria-pressed="false"></button><button class="swatch" data-color="#ffe29a" style="--swatch:#ffe29a" aria-label="Yellow ink" aria-pressed="false"></button><label class="custom-color" title="Custom ink color">＋<input id="custom-color" type="color" value="#ffffff" aria-label="Custom ink color"></label></div>
+    <span class="divider"></span><label class="size-label" title="Stroke width"><span id="size-dot"></span><input id="size" type="range" min="2" max="32" value="5" aria-label="Stroke width"><output id="size-value">5</output></label>
+    <span class="divider"></span><button id="undo" class="tool" title="Undo (Ctrl/⌘ Z)" aria-label="Undo" disabled>↶</button><button id="redo" class="tool" title="Redo (Ctrl/⌘ Shift Z)" aria-label="Redo" disabled>↷</button>
+  </nav>
+  <div class="footer-actions"><button id="save" class="quiet" title="Save PNG">↓ <span>Save</span></button><button id="clear" class="quiet" title="Clear canvas">⌫</button><button id="hide-ui" class="quiet" title="Hide controls (H)">◱</button></div>
+</footer>
+<button id="restore-ui" hidden title="Show controls (H)" aria-label="Show controls">◱</button>
+<dialog id="setup">
+  <div class="dialog-heading"><div><div class="eyebrow">MAKE THE CONNECTION</div><h2>Your wall, connected.</h2></div><button id="close-setup" class="quiet" aria-label="Close setup">✕</button></div>
+  <p class="setup-intro">Mount the webcam on your projector, facing the wall. Keep the whole projected area and your hand in view.</p>
+  <div class="setup-grid"><section class="camera-section"><div class="video-wrap"><video id="video" autoplay muted playsinline></video><canvas id="preview"></canvas><div id="video-placeholder"><span>◉</span>Camera preview</div></div><div class="camera-controls"><select id="cameras" aria-label="Select camera"><option value="">Default camera</option></select><button id="connect" class="primary">Connect camera</button></div><p id="camera-message" role="status">Video stays on your device. No accounts, no uploads.</p></section>
+  <section class="setup-options"><label>Drawing gesture<select id="gesture"><option value="point">Point to draw · open hand to pause</option><option value="pinch">Thumb + middle finger pinch to draw</option></select></label><p>Keep your index finger at the wall. With pinch mode, touch your thumb to your middle finger to turn ink on.</p><label>Smoothing <input id="smoothing" type="range" min="0" max="85" value="45"></label><label class="toggle"><input id="mirror" type="checkbox"> Mirror camera coordinates</label><div class="calibration-card"><span id="calibration-status">○ Not calibrated</span><p>Line up four points to match the camera to your projection. Recalibrate if the camera or projector moves.</p><button id="calibrate" class="secondary" disabled>Calibrate projection <span>↗</span></button></div><button id="disconnect" class="text-button" disabled>Disconnect camera</button></section></div>
+  <div class="setup-note"><b>Extended display setup</b><p>Choose “Extend” in your computer’s display settings. Move this window onto the projector, enter fullscreen, then calibrate. The app runs inside that display; it does not create a virtual display.</p></div>
+  <details><summary>Quick controls & setup tips</summary><p>P: pen · E: eraser · F: fullscreen · H: hide controls · Ctrl/⌘ Z: undo · Esc: cancel calibration. Mouse and touch also work. Hold your fingertip over a pen, color, eraser, or undo button for a second to select it from the wall. Some room light helps the webcam see your hand against a black canvas. A webcam tracks position, not wall contact.</p></details>
+</dialog>
+<div id="calibration" hidden>
+  <div id="target"><span></span><b>1</b></div>
+  <div class="calibration-instructions"><div class="eyebrow">ALIGN YOUR PROJECTION <span id="cal-step">1 / 4</span></div><h2>Place your fingertip on the target.</h2><p id="cal-message">Hold your index fingertip at the center, then press Space.<br>Or start a 3-second capture and move to the target.</p><div><button id="capture" class="primary">Capture in 3 seconds</button><button id="cancel-cal" class="quiet">Cancel</button></div></div>
+</div>
+<dialog id="clear-dialog"><h2>A fresh canvas?</h2><p>You can undo this if you change your mind.</p><div class="confirm-actions"><button id="cancel-clear" class="quiet">Keep drawing</button><button id="confirm-clear" class="primary">Clear canvas</button></div></dialog>
+<div id="toast" role="status" hidden></div>
+<script type="module" src="src/app.js"></script>
+</body></html>
