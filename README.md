@@ -28,7 +28,7 @@ Open **http://localhost:4173**. Setup downloads the official MediaPipe hand mode
 6. Draw on the wall with just your index finger extended and your other fingers curled. **Open your hand to pause**. Alternatively choose pinch mode: keep the index finger pointing and pinch your thumb to your middle finger to draw.
 7. Hold the fingertip over a pen, color, eraser, undo, or redo button for about a second to select it without using the computer. Save, clear, and settings are available with the mouse. H hides the controls, leaving a small restore button.
 
-The camera detects the fingertip's position, **not physical wall contact**. Gestures control whether ink is on. Finger tracking can fail if your hand is too small in the camera frame, blurred, blocked, or poorly lit. For a very large projection, test webcam resolution and placement. Recalibrate whenever you move the projector/camera or change projection geometry, zoom, keystone, or display arrangement. An aspect-ratio change invalidates calibration automatically. Calibration for a different camera is also invalidated.
+The camera detects the fingertip's position, **not physical wall contact**. Gestures control whether ink is on. Finger tracking can fail if your hand is too small in the camera frame, blurred, blocked, or poorly lit. For a very large projection, test webcam resolution and placement. Recalibrate whenever you move the projector/camera or change projection geometry, optical zoom, keystone, or display arrangement. Tracking-crop adjustments preserve camera coordinates. An aspect-ratio change invalidates calibration automatically. Calibration for a different camera is also invalidated.
 
 ## Drawing controls
 
@@ -92,3 +92,28 @@ Cropping makes a small hand or marker larger in the detector's input; it cannot 
 ## Erase
 
 Click **Erase** in the bottom toolbar or press **E**. It starts with a broad brush (48), has its own saved-in-session size, and the size slider adjusts it up to 120. With the webcam, use your normal drawing gesture (or marker ink) to erase; the cursor becomes a dashed eraser circle. Hold over the projected Erase button to select it from the wall. Press **P** or select a color to return to drawing. Undo restores erased ink. The clear button removes the whole canvas after confirmation and is also undoable.
+
+## Use your phone as the camera
+
+1. On the main device, open the [live app](https://maxplank69420-svg.github.io/lightboard/), move it to your projector display, and enter fullscreen.
+2. Use **Drawing area** (also available in Setup) to fit the usable surface before calibrating.
+3. Choose **Phone camera → Create pairing code**. Scan the QR with the phone's camera app, or copy the pairing link to the phone. A new code pairs one phone with this display. Keep the link private.
+4. On the phone page, press **Start phone camera** and allow camera access. The rear camera is preferred; the camera selector can switch lenses. Keep the phone mounted, still, and facing the entire surface. It can be closer to the wall than the projector.
+5. On the phone, choose **Tap projected targets in the camera image → Start calibration**. The main display shows targets 1–4 one at a time. Tap each target's position in the phone's live camera image. You do not need hand tracking to work for this calibration method. **Redo previous point** corrects a capture. You can also choose fingertip calibration and trigger its 3-second capture from the phone.
+6. Draw with the selected hand gesture, or use colored-marker mode. The phone has Pen, Erase, Undo, Redo, colors, and pause/resume controls. Marker ink starts paused. Recalibrate if either device, its camera/lens, orientation, or projection area changes.
+
+Keep the phone page in the foreground. Screen wake lock is requested when supported. Backgrounding/locking the phone pauses drawing, and disconnection or stale tracking stops ink on the main display. Stop the camera or disconnect from either device when finished.
+
+Camera frames and hand/marker inference stay on the phone. The phone sends coordinates, gesture state, and tool controls over encrypted WebRTC. The default PeerJS cloud provides online connection signaling and fallback TURN relays. No app account or server-side camera processing is required. Internet is required for pairing; the same Wi-Fi network is recommended. If pairing fails on a restricted network, use a fresh code and a network that allows WebRTC. A local `localhost` link is only reachable on that computer: use the published HTTPS app to pair an actual phone.
+
+## Fit a different surface or aspect ratio
+
+Open **Drawing area** and choose **4:3**, **16:9**, **Square**, or **Fill screen**. Drag the four corner handles to crop, resize, or skew the usable canvas onto your surface. Handles also respond to arrow keys. This supports a trapezoid or independently tilted edges, rather than requiring a straight rectangle. Press **Use this drawing area**, then recalibrate. The saved drawing is fitted to this area and mouse/webcam/phone drawing is clipped to it. Hide the controls with H for a black surround. Cancel restores the previous area. PNG export includes the visible drawing and its black surround.
+
+## What does “points cross” mean?
+
+It describes the **recorded camera coordinates**, not the straightness of your wall. The four samples must follow the projected target order around the boundary. A rotated rectangle, trapezoid, and small quadrilateral are supported. If a tracking jump, repeated capture, or wrong target records the points in a bow-tie or folded order, a single perspective transform cannot align them. Calibration now shows numbered recorded points and lets you redo them. Holding Space no longer captures successive targets through keyboard repeat. Click/tap calibration is the preferred workaround when fingertip tracking is unreliable.
+
+## Two-device verification
+
+Open [`tests/pairing.html`](https://maxplank69420-svg.github.io/lightboard/tests/pairing.html) and run the end-to-end test. It pairs two independent WebRTC endpoints via the live public signaling service, runs the actual display in a frame with separate diagnostic storage, calibrates a synthetic oblique camera view, verifies projected ink and erased pixels, restores them through Undo, and checks pause/disconnection. It does not open a camera or alter regular saved drawings. This verifies the transport and application behavior; physical phone-camera quality and projector alignment still need an installation test.
