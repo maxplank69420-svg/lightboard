@@ -14,7 +14,7 @@ npm run setup
 npm start
 ```
 
-You can also run `./start-lightboard.sh` to install missing dependencies and start the app.
+You can also run `bash ./start-lightboard.sh` to install missing dependencies and start the app.
 
 Open **http://localhost:4173**. Setup downloads the official MediaPipe hand model and copies its runtime into `vendor/`. Once installed, the app works without an internet connection. Node.js 22 LTS or newer is required.
 
