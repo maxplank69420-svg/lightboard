@@ -1,0 +1,15 @@
+<!doctype html><html><head><meta charset="UTF-8"><title>Tracking diagnostics</title></head><body style="background:#111;color:#eee;font:16px monospace;padding:30px"><h1>Local tracking runtime</h1><p id="result">Starting hand tracking worker…</p><script type="module">
+const result=document.getElementById('result');
+const worker=new Worker('../src/tracker.js',{type:'classic'});
+worker.onmessage=({data})=>{
+ if(data.type==='ready'){
+  result.textContent='Runtime loaded. Testing frame inference…';
+  const canvas=new OffscreenCanvas(640,480),ctx=canvas.getContext('2d');ctx.fillStyle='#777';ctx.fillRect(0,0,640,480);
+  const bitmap=canvas.transferToImageBitmap();worker.postMessage({type:'frame',bitmap,time:performance.now()},[bitmap]);
+ }else if(data.type==='result'){
+  result.textContent=data.landmarks===null?'PASS: Local WASM runtime, hand model, transferable frames, and inference work in the background worker. Blank test frame correctly returns no hand.':'FAIL: unexpected hand in blank test frame.';worker.terminate();
+ }else if(data.type==='error')result.textContent='FAIL: '+data.message;
+};
+worker.onerror=e=>result.textContent='FAIL: '+e.message;
+worker.postMessage({type:'init'});
+</script></body></html>
