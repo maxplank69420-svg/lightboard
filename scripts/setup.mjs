@@ -9,4 +9,9 @@ catch {
   if (!res.ok) throw new Error(`Model download failed: ${res.status}`);
   await writeFile('vendor/hand_landmarker.task', Buffer.from(await res.arrayBuffer()));
 }
-console.log('Ready. Camera processing works locally; no internet needed at runtime.');
+console.log('Camera assets ready. Camera processing is local; phone pairing uses online signaling.');
+const { build } = await import('esbuild');
+await build({stdin:{contents:'export { Peer } from "peerjs"; import QRCode from "qrcode"; export { QRCode };',resolveDir:process.cwd()},bundle:true,format:'esm',platform:'browser',target:'es2020',minify:true,outfile:'vendor/connect.mjs',legalComments:'linked'});
+
+const { readFile } = await import('node:fs/promises');
+await writeFile('vendor/PAIRING_LICENSES.txt',(await Promise.all(['peerjs/LICENSE','qrcode/license'].map(async path=>{try{return path+'\n'+await readFile('node_modules/'+path,'utf8');}catch{return '';}}))).join('\n\n'));
