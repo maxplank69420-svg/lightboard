@@ -1,6 +1,8 @@
 export const targets = [{x:.12,y:.16},{x:.88,y:.16},{x:.88,y:.84},{x:.12,y:.84}];
 export function homography(from, to = targets) {
   if (from.length !== 4 || to.length !== 4) throw new Error('Four calibration points are required.');
+  validateQuad(from);
+  validateQuad(to);
   const rows = [];
   for (let i=0;i<4;i++) {
     const {x,y}=from[i], {x:u,y:v}=to[i];
@@ -9,15 +11,12 @@ export function homography(from, to = targets) {
   for (let c=0;c<8;c++) {
     let pivot=c;
     for (let r=c+1;r<8;r++) if(Math.abs(rows[r][c])>Math.abs(rows[pivot][c])) pivot=r;
-    if(Math.abs(rows[pivot][c])<1e-9) throw new Error('Calibration points overlap. Try again with four distinct corners.');
+    if(Math.abs(rows[pivot][c])<1e-9) throw new Error('Two recorded points overlap or the area is too narrow. Redo the last point, or use click-to-calibrate.');
     [rows[c],rows[pivot]]=[rows[pivot],rows[c]];
     const d=rows[c][c]; for(let j=c;j<9;j++) rows[c][j]/=d;
     for(let r=0;r<8;r++) if(r!==c) {const k=rows[r][c]; for(let j=c;j<9;j++) rows[r][j]-=k*rows[c][j];}
   }
   const h=rows.map(r=>r[8]);
-  // A folded or nearly collapsed quadrilateral cannot describe the projected plane.
-  const crosses=from.map((a,i)=>{const b=from[(i+1)%4],c=from[(i+2)%4];return (b.x-a.x)*(c.y-b.y)-(b.y-a.y)*(c.x-b.x);});
-  if(crosses.some(v=>Math.abs(v)<.0001) || !crosses.every(v=>Math.sign(v)===Math.sign(crosses[0]))) throw new Error('Targets must form a clear, non-crossing rectangle in the camera view.');
   return h;
 }
 export function project(p,h) {
@@ -34,3 +33,18 @@ export function gesture(landmarks, mode, wasDrawing=false) {
   return extended(8,6) && !extended(12,10) && !extended(16,14);
 }
 export function inside(p) {return Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>=0&&p.y>=0&&p.x<=1&&p.y<=1;}
+
+export const unitQuad=[{x:0,y:0},{x:1,y:0},{x:1,y:1},{x:0,y:1}];
+export function validateQuad(points){
+ if(points.length!==4||points.some(p=>!Number.isFinite(p.x)||!Number.isFinite(p.y)))throw new Error('Four distinct corner positions are needed.');
+ const xs=points.map(p=>p.x),ys=points.map(p=>p.y),scale=(Math.max(...xs)-Math.min(...xs))*(Math.max(...ys)-Math.min(...ys));
+ const crosses=points.map((a,i)=>{const b=points[(i+1)%4],c=points[(i+2)%4];return (b.x-a.x)*(c.y-b.y)-(b.y-a.y)*(c.x-b.x);});
+ if(scale<1e-10||crosses.some(v=>Math.abs(v)<scale*1e-6))throw new Error('Recorded points overlap or nearly line up. Redo a point, or click the targets in the camera image. A tilted rectangle or trapezoid is fine.');
+ if(!crosses.every(v=>Math.sign(v)===Math.sign(crosses[0])))throw new Error('The recorded camera points cross or fold inward. Follow targets 1 → 2 → 3 → 4 around the edge. Tilted rectangles and trapezoids are allowed; redo the bad point.');
+ return true;
+}
+export function projectionPreset(aspect,viewportWidth,viewportHeight){
+ if(!aspect)return unitQuad.map(p=>({...p}));
+ const w=Math.min(viewportWidth,viewportHeight*aspect)/viewportWidth,h=Math.min(viewportHeight,viewportWidth/aspect)/viewportHeight;
+ return [{x:(1-w)/2,y:(1-h)/2},{x:(1+w)/2,y:(1-h)/2},{x:(1+w)/2,y:(1+h)/2},{x:(1-w)/2,y:(1+h)/2}];
+}
