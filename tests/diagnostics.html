@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset="UTF-8"><title>Tracking diagnostics</title></head><body style="background:#111;color:#eee;font:16px monospace;padding:30px"><h1>Local tracking runtime</h1><p id="result">Starting hand tracking worker…</p><script type="module">
+<!doctype html><html><head><meta charset="UTF-8"><title>Tracking diagnostics</title></head><body style="background:#111;color:#eee;font:16px monospace;padding:30px"><h1>Local tracking runtime</h1><p id="result">Starting hand tracking worker…</p><p id="marker-result">Starting independent marker tracker…</p><script type="module">
 const result=document.getElementById('result');
 const worker=new Worker('../src/tracker.js',{type:'classic'});
 worker.onmessage=({data})=>{
@@ -7,9 +7,20 @@ worker.onmessage=({data})=>{
   const canvas=new OffscreenCanvas(640,480),ctx=canvas.getContext('2d');ctx.fillStyle='#777';ctx.fillRect(0,0,640,480);
   const bitmap=canvas.transferToImageBitmap();worker.postMessage({type:'frame',bitmap,time:performance.now()},[bitmap]);
  }else if(data.type==='result'){
-  result.textContent=data.landmarks===null?'PASS: Local WASM runtime, hand model, transferable frames, and inference work in the background worker. Blank test frame correctly returns no hand.':'FAIL: unexpected hand in blank test frame.';worker.terminate();
+  result.textContent=data.landmarks===null?'PASS: Local WASM runtime, hand model, transferable frames, and blank-frame inference work in the background worker.':'FAIL: unexpected hand in blank test frame.';worker.terminate();
  }else if(data.type==='error')result.textContent='FAIL: '+data.message;
 };
 worker.onerror=e=>result.textContent='FAIL: '+e.message;
 worker.postMessage({type:'init'});
+const markerResult=document.getElementById('marker-result'),markerWorker=new Worker('../src/tracker.js',{type:'classic'});
+markerWorker.onmessage=({data})=>{
+ if(data.type==='ready'){
+  const canvas=new OffscreenCanvas(640,480),ctx=canvas.getContext('2d');ctx.fillStyle='#222';ctx.fillRect(0,0,640,480);ctx.fillStyle='#ff00ff';ctx.fillRect(314,234,12,12);
+  const bitmap=canvas.transferToImageBitmap();markerWorker.postMessage({type:'frame',mode:'marker',color:'#ff00ff',crop:{x:.25,y:.25,width:.5,height:.5},bitmap,time:performance.now()},[bitmap]);
+ }else if(data.type==='result'){
+  markerResult.textContent=data.marker&&Math.abs(data.marker.x-.5)<.01&&Math.abs(data.marker.y-.5)<.01?'PASS: Independent marker tracking finds a small colored patch and maps cropped coordinates back to the full camera frame.':'FAIL: marker tracking or crop remapping failed.';markerWorker.terminate();
+ }else if(data.type==='error')markerResult.textContent='FAIL: '+data.message;
+};
+markerWorker.onerror=e=>markerResult.textContent='FAIL: '+e.message;
+markerWorker.postMessage({type:'init',mode:'marker'});
 </script></body></html>

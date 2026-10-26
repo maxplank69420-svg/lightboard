@@ -7,7 +7,7 @@
     "start": "node scripts/serve.mjs",
     "setup": "node scripts/setup.mjs",
     "test": "node --test",
-    "check": "node --check src/app.js && node --check src/tracker.js",
+    "check": "node --check src/app.js && node --check src/tracker.js && node --check src/tracking.js",
     "build": "node scripts/build.mjs"
   },
   "dependencies": {
